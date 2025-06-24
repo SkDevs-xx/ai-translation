@@ -13,8 +13,3 @@ requests>=2.31.0
 pystray>=0.19.0
 pillow>=10.0.0
 
-# Windows固有機能用 - 自動起動、多重起動防止
-pywin32>=306; sys_platform == "win32"
-
-# 開発・ビルド用
-pyinstaller>=6.0.0

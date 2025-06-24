@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 class SecurityManager:
     """APIキーなどの機密情報を暗号化して保存するためのクラス"""
     
-    def __init__(self, exe_dir):
-        self.exe_dir = Path(exe_dir)
-        self.settings_file = self.exe_dir / "settings.enc"
+    def __init__(self, script_dir):
+        self.script_dir = Path(script_dir)
+        self.settings_file = self.script_dir / "settings.enc"
         self._encryption_key = None
     
     def _get_machine_key(self):

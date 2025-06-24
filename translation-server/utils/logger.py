@@ -17,14 +17,11 @@ def setup_logging(log_level=logging.INFO):
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
         
-        # 実行ファイルのディレクトリを取得
-        if getattr(sys, 'frozen', False):
-            exe_dir = Path(sys.executable).parent
-        else:
-            exe_dir = Path(os.path.abspath(__file__)).parent.parent
+        # スクリプトのディレクトリを取得
+        script_dir = Path(os.path.abspath(__file__)).parent.parent
         
         # ログファイルのパス
-        log_file = exe_dir / "python-log.txt"
+        log_file = script_dir / "python-log.txt"
         
         # ファイルハンドラーを追加
         try:

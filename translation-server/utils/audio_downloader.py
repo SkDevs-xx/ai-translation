@@ -7,6 +7,7 @@ import time
 import logging
 from pathlib import Path
 import yt_dlp
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -37,19 +38,29 @@ class AudioDownloader:
             logger.info(f"キャッシュされた音声ファイルを使用: {audio_path}")
             return True, {'path': str(audio_path), 'title': 'Cached Audio'}
         
+        # ffmpegがインストールされているか確認
+        ffmpeg_available = shutil.which('ffmpeg') is not None
+        
         # yt-dlpオプション
         ydl_opts = {
             'format': 'bestaudio[abr<=128]/bestaudio/best',
             'outtmpl': str(audio_path.with_suffix('.%(ext)s')),
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '128',
-            }],
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
         }
+        
+        # ffmpegが利用可能な場合のみ音声変換を有効化
+        if ffmpeg_available:
+            ydl_opts['postprocessors'] = [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '128',
+            }]
+            logger.info("ffmpegが利用可能です。MP3形式で音声を抽出します。")
+        else:
+            logger.warning("ffmpegが見つかりません。音声ファイルは元の形式のままダウンロードされます。")
+            logger.warning("MP3形式での抽出を行うには、ffmpegをインストールしてください。")
         
         # 進捗コールバックの設定
         if progress_callback:
@@ -74,11 +85,18 @@ class AudioDownloader:
                 # ダウンロード完了確認
                 if not audio_path.exists():
                     # 拡張子違いのファイルを探す
-                    for ext in ['.mp3', '.m4a', '.webm']:
+                    for ext in ['.mp3', '.m4a', '.webm', '.opus', '.wav']:
                         alt_path = audio_path.with_suffix(ext)
                         if alt_path.exists():
                             audio_path = alt_path
                             break
+                    
+                    # まだ見つからない場合は、ディレクトリ内のファイルを確認
+                    if not audio_path.exists():
+                        for file in self.temp_dir.glob(f"{video_id}.*"):
+                            if file.suffix in ['.mp3', '.m4a', '.webm', '.opus', '.wav']:
+                                audio_path = file
+                                break
                 
                 download_time = time.time() - start_time
                 logger.info(f"音声ダウンロード完了: {download_time:.1f}秒")
@@ -97,10 +115,11 @@ class AudioDownloader:
         """古い一時ファイルを削除"""
         try:
             current_time = time.time()
-            for file_path in self.temp_dir.glob("*.mp3"):
-                file_age = current_time - file_path.stat().st_mtime
-                if file_age > max_age_hours * 3600:
-                    file_path.unlink()
-                    logger.info(f"古い音声ファイルを削除: {file_path}")
+            for file_path in self.temp_dir.glob("*"):
+                if file_path.suffix in ['.mp3', '.m4a', '.webm', '.opus', '.wav']:
+                    file_age = current_time - file_path.stat().st_mtime
+                    if file_age > max_age_hours * 3600:
+                        file_path.unlink()
+                        logger.info(f"古い音声ファイルを削除: {file_path}")
         except Exception as e:
             logger.error(f"クリーンアップエラー: {e}")

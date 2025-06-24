@@ -12,9 +12,6 @@ import threading
 from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox
-import win32event
-import win32api
-import winerror
 
 # 内部モジュール
 from core.config import APP_NAME, APP_VERSION, SERVER_PORT
@@ -35,14 +32,11 @@ class YouTubeTranslatorApp:
     """メインアプリケーションクラス"""
     
     def __init__(self):
-        # 実行ファイルのディレクトリを取得
-        if getattr(sys, 'frozen', False):
-            self.exe_dir = Path(os.path.dirname(sys.executable))
-        else:
-            self.exe_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        # スクリプトのディレクトリを取得
+        self.script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
         
         # マネージャーを初期化
-        self.security_manager = SecurityManager(self.exe_dir)
+        self.security_manager = SecurityManager(self.script_dir)
         self.server_manager = ServerManager(self.security_manager)
         self.main_window = None
         self.tray_icon = None
@@ -54,7 +48,7 @@ class YouTubeTranslatorApp:
     def create_tray_icon(self):
         """タスクトレイアイコンを作成"""
         # アイコン画像を作成（または既存のアイコンを使用）
-        icon_path = self.exe_dir / "icons" / "icons-16.png"
+        icon_path = self.script_dir / "icons" / "icons-16.png"
         
         if icon_path.exists():
             try:
@@ -209,36 +203,30 @@ class YouTubeTranslatorApp:
 
 
 def check_single_instance():
-    """アプリケーションの多重起動をチェック"""
-    # ユニークな名前のミューテックスを作成
-    mutex_name = f"Global\\{APP_NAME.replace(' ', '_')}_Mutex_{SERVER_PORT}"
+    """アプリケーションの多重起動をチェック（ポートベース）"""
+    import socket
     
+    # ポートが既に使用中かチェック
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        # ミューテックスの作成を試みる
-        mutex = win32event.CreateMutex(None, False, mutex_name)
-        
-        # 既に存在する場合はエラーになる
-        if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
-            # 既に起動している
-            win32api.CloseHandle(mutex)
-            return False
-        
-        # ミューテックスを保持（アプリケーション終了まで）
-        return mutex
-    except Exception as e:
-        logger.error(f"ミューテックス作成エラー: {e}")
-        return None
+        # ポートにバインドを試みる
+        sock.bind(('127.0.0.1', SERVER_PORT))
+        sock.close()
+        return True  # ポートが空いている
+    except socket.error:
+        # ポートが既に使用中
+        return False
 
 
 def main():
     """メイン関数"""
     # 多重起動チェック
-    mutex = check_single_instance()
-    if mutex is False:
+    if not check_single_instance():
         # 既に起動している場合
         messagebox.showwarning(
             "既に起動しています",
             f"{APP_NAME}は既に起動しています。\n"
+            f"ポート{SERVER_PORT}が既に使用中です。\n"
             "タスクトレイのアイコンを確認してください。"
         )
         sys.exit(0)
@@ -256,22 +244,14 @@ def main():
         
         # エラーログファイルに記録
         try:
-            if getattr(sys, 'frozen', False):
-                exe_dir = Path(os.path.dirname(sys.executable))
-            else:
-                exe_dir = Path(os.path.dirname(os.path.abspath(__file__)))
-            
-            error_file = exe_dir / "error.log"
+            script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+            error_file = script_dir / "error.log"
             with open(error_file, 'w', encoding='utf-8') as f:
                 f.write(error_msg)
         except:
             pass
         
         sys.exit(1)
-    finally:
-        # ミューテックスを解放
-        if mutex and mutex is not False:
-            win32api.CloseHandle(mutex)
 
 
 if __name__ == '__main__':
