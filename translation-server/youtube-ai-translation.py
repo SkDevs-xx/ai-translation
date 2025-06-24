@@ -72,7 +72,7 @@ class YouTubeTranslatorApp:
                            lambda item: not self.server_manager.is_running()),
             pystray.MenuItem("サーバーを停止", self.stop_server_from_tray,
                            lambda item: self.server_manager.is_running()),
-            pystray.MenuItem("-", None),
+            pystray.Menu.SEPARATOR,
             pystray.MenuItem("終了", self.quit_app)
         )
         

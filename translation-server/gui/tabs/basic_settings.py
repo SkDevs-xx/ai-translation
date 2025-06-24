@@ -22,33 +22,25 @@ class BasicSettingsTab:
         # フレーム作成
         self.frame = ttk.Frame(parent)
         
-        # スクロール可能なキャンバスを作成
-        canvas = tk.Canvas(self.frame)
-        scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = ttk.Frame(canvas)
+        # メインコンテナ
+        main_container = ttk.Frame(self.frame)
+        main_container.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        # 上部フレーム（起動設定とAPI設定）
+        upper_frame = ttk.Frame(main_container)
+        upper_frame.pack(fill="x", pady=(0, 10))
+        self._create_top_settings_section(upper_frame)
         
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        # 上部の設定エリア（起動設定とAPI設定を横並び）
-        self._create_top_settings_section()
-        # プロンプト設定
-        self._create_prompt_section()
-        
-        # レイアウト
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # 下部フレーム（プロンプト設定）
+        lower_frame = ttk.Frame(main_container)
+        lower_frame.pack(fill="both", expand=True)
+        self._create_prompt_section(lower_frame)
     
-    def _create_top_settings_section(self):
+    def _create_top_settings_section(self, parent):
         """上部の設定セクション（起動設定とAPI設定を横並び）"""
         # 横並びコンテナフレーム
-        top_container = ttk.Frame(self.scrollable_frame)
-        top_container.pack(fill="x", padx=10, pady=(10, 0))
+        top_container = ttk.Frame(parent)
+        top_container.pack(fill="both", expand=True)
         
         # 左側：起動設定
         self._create_auto_start_section(top_container)
@@ -76,7 +68,7 @@ class BasicSettingsTab:
         self.api_key_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
         
         # 保存ボタン
-        save_button = ttk.Button(input_frame, text="保存", command=self._save_api_key)
+        save_button = ttk.Button(input_frame, text="保存", command=self._save_api_key, width=10)
         save_button.pack(side="left")
         
         # 表示/非表示トグル
@@ -124,11 +116,11 @@ class BasicSettingsTab:
         self.auto_start_status_label.pack(anchor="w", pady=(10, 0))
         self._update_auto_start_status()
     
-    def _create_prompt_section(self):
+    def _create_prompt_section(self, parent):
         """プロンプト設定セクションを作成"""
         # プロンプトフレーム
-        prompt_frame = ttk.LabelFrame(self.scrollable_frame, text="翻訳プロンプト設定", padding="10")
-        prompt_frame.pack(fill="both", expand=True, padx=10, pady=(10, 20))
+        prompt_frame = ttk.LabelFrame(parent, text="翻訳プロンプト設定", padding="10")
+        prompt_frame.pack(fill="both", expand=True)
         
         # 説明ラベル
         desc_label = ttk.Label(prompt_frame, text="翻訳時に使用するプロンプトをカスタマイズできます:")
@@ -155,7 +147,8 @@ class BasicSettingsTab:
         reset_button = ttk.Button(
             button_frame,
             text="デフォルトに戻す",
-            command=self._reset_prompt
+            command=self._reset_prompt,
+            width=20
         )
         reset_button.pack(side="left", padx=(0, 10))
         
@@ -163,7 +156,8 @@ class BasicSettingsTab:
         save_prompt_button = ttk.Button(
             button_frame,
             text="プロンプトを保存",
-            command=self._save_prompt
+            command=self._save_prompt,
+            width=20
         )
         save_prompt_button.pack(side="left")
         
@@ -266,4 +260,4 @@ class BasicSettingsTab:
         if self.auto_start_var.get():
             self.auto_start_status_label.config(text="✓ 自動起動が有効です", foreground="green")
         else:
-            self.auto_start_status_label.config(text="✗ 自動起動が無効です", foreground="gray")
+            self.auto_start_status_label.config(text="－ 自動起動が無効です", foreground="gray")

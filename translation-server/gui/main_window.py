@@ -27,7 +27,7 @@ class MainWindow:
         """メインウィンドウを作成"""
         self.root = tk.Tk()
         self.root.title(f"{APP_NAME} v{APP_VERSION}")
-        self.root.geometry("800x600")
+        self.root.geometry("600x500")
         
         # アイコン設定
         self._set_app_icon()

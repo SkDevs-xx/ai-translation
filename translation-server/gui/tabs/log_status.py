@@ -42,30 +42,25 @@ class LogStatusTab:
         # ログキュー
         self.log_queue = queue.Queue()
         
-        # メインのPanedWindow（垂直分割）
-        main_paned = ttk.PanedWindow(self.frame, orient=tk.VERTICAL)
-        main_paned.pack(fill="both", expand=True, padx=10, pady=10)
+        # メインコンテナ
+        main_container = ttk.Frame(self.frame)
+        main_container.pack(fill="both", expand=True, padx=10, pady=10)
         
         # 上部フレーム（サーバーステータスと翻訳管理）
-        upper_frame = ttk.Frame(main_paned)
+        upper_frame = ttk.Frame(main_container)
+        upper_frame.pack(fill="x", pady=(0, 10))
         
-        # 上部をさらに水平分割
-        upper_paned = ttk.PanedWindow(upper_frame, orient=tk.HORIZONTAL)
-        upper_paned.pack(fill="both", expand=True)
-        
+        # 上部を水平に配置
         # サーバーステータスセクション
-        self._create_server_status_section(upper_paned)
+        self._create_server_status_section(upper_frame)
         
         # 翻訳ファイル管理セクション
-        self._create_translations_section(upper_paned)
+        self._create_translations_section(upper_frame)
         
         # 下部フレーム（ログ表示）
-        lower_frame = ttk.Frame(main_paned)
+        lower_frame = ttk.Frame(main_container)
+        lower_frame.pack(fill="both", expand=True)
         self._create_log_section(lower_frame)
-        
-        # PanedWindowに追加
-        main_paned.add(upper_frame, weight=1)
-        main_paned.add(lower_frame, weight=2)
         
         # ログハンドラーを設定
         self._setup_log_handler()
@@ -129,7 +124,7 @@ class LogStatusTab:
         )
         self.restart_button.pack(side="left", padx=5)
         
-        parent.add(status_frame, weight=1)
+        status_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
         
         # API キー状態を更新
         self.update_api_key_status()
@@ -170,7 +165,8 @@ class LogStatusTab:
         refresh_button = ttk.Button(
             button_frame,
             text="リスト更新",
-            command=self.refresh_translations_list
+            command=self.refresh_translations_list,
+            width=15
         )
         refresh_button.pack(side="left", padx=(0, 5))
         
@@ -179,6 +175,7 @@ class LogStatusTab:
             button_frame,
             text="YouTubeで開く",
             command=self._open_in_youtube,
+            width=15,
             state=tk.DISABLED
         )
         self.open_youtube_button.pack(side="left", padx=5)
@@ -188,11 +185,12 @@ class LogStatusTab:
             button_frame,
             text="削除",
             command=self._delete_selected_translation,
+            width=10,
             state=tk.DISABLED
         )
         self.delete_button.pack(side="left", padx=5)
         
-        parent.add(trans_frame, weight=1)
+        trans_frame.pack(side="left", fill="both", expand=True, padx=(5, 0))
         
         # 翻訳データを保持
         self.translations_data = {}
@@ -248,7 +246,8 @@ class LogStatusTab:
         clear_button = ttk.Button(
             control_frame,
             text="ログをクリア",
-            command=self._clear_logs
+            command=self._clear_logs,
+            width=15
         )
         clear_button.pack(side="left")
     
@@ -309,20 +308,20 @@ class LogStatusTab:
     def update_server_status(self):
         """サーバーステータスを更新"""
         if self.server_manager.is_running():
-            self.status_label.config(text="稼働中", foreground="green")
+            self.status_label.config(text="✓ 稼働中", foreground="green")
             self.toggle_button.config(text="サーバーを停止", state=tk.NORMAL)
             self.restart_button.config(state=tk.NORMAL, text="再起動")
         else:
-            self.status_label.config(text="停止中", foreground="red")
+            self.status_label.config(text="✗ 停止中", foreground="red")
             self.toggle_button.config(text="サーバーを起動", state=tk.NORMAL)
             self.restart_button.config(state=tk.DISABLED, text="再起動")
     
     def update_api_key_status(self):
         """APIキーステータスを更新"""
         if self.security_manager.load_api_key():
-            self.api_key_status_label.config(text="設定済み", foreground="green")
+            self.api_key_status_label.config(text="✓ 設定済み", foreground="green")
         else:
-            self.api_key_status_label.config(text="未設定", foreground="red")
+            self.api_key_status_label.config(text="⚠ 未設定", foreground="orange")
     
     def refresh_translations_list(self):
         """翻訳リストを更新"""
