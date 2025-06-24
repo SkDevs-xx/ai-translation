@@ -35,23 +35,35 @@ class BasicSettingsTab:
         canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
-        # 各セクションを作成
-        self._create_api_key_section()
-        self._create_auto_start_section()
+        # 上部の設定エリア（起動設定とAPI設定を横並び）
+        self._create_top_settings_section()
+        # プロンプト設定
         self._create_prompt_section()
         
         # レイアウト
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
     
-    def _create_api_key_section(self):
+    def _create_top_settings_section(self):
+        """上部の設定セクション（起動設定とAPI設定を横並び）"""
+        # 横並びコンテナフレーム
+        top_container = ttk.Frame(self.scrollable_frame)
+        top_container.pack(fill="x", padx=10, pady=(10, 0))
+        
+        # 左側：起動設定
+        self._create_auto_start_section(top_container)
+        
+        # 右側：API設定
+        self._create_api_key_section(top_container)
+    
+    def _create_api_key_section(self, parent):
         """API キー設定セクションを作成"""
         # APIキーフレーム
-        api_frame = ttk.LabelFrame(self.scrollable_frame, text="API Key設定", padding="10")
-        api_frame.pack(fill="x", padx=20, pady=(20, 10))
+        api_frame = ttk.LabelFrame(parent, text="API Key設定", padding="10")
+        api_frame.pack(side="left", fill="both", expand=True, padx=(10, 0))
         
         # 説明
-        desc_label = ttk.Label(api_frame, text="Google Gemini APIキーを入力してください（暗号化して保存されます）")
+        desc_label = ttk.Label(api_frame, text="Google Gemini APIキーを入力してください\n（暗号化して保存されます）", justify="left")
         desc_label.pack(anchor="w", pady=(0, 10))
         
         # 入力フレーム
@@ -60,7 +72,7 @@ class BasicSettingsTab:
         
         # API キー入力フィールド
         self.api_key_var = tk.StringVar()
-        self.api_key_entry = ttk.Entry(input_frame, textvariable=self.api_key_var, width=50, show="*")
+        self.api_key_entry = ttk.Entry(input_frame, textvariable=self.api_key_var, width=40, show="*")
         self.api_key_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
         
         # 保存ボタン
@@ -84,11 +96,15 @@ class BasicSettingsTab:
         # 既存のAPIキーをロード
         self._load_existing_api_key()
     
-    def _create_auto_start_section(self):
+    def _create_auto_start_section(self, parent):
         """自動起動設定セクションを作成"""
         # 自動起動フレーム
-        auto_frame = ttk.LabelFrame(self.scrollable_frame, text="起動設定", padding="10")
-        auto_frame.pack(fill="x", padx=20, pady=10)
+        auto_frame = ttk.LabelFrame(parent, text="起動設定", padding="10")
+        auto_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
+        
+        # 説明
+        desc_label = ttk.Label(auto_frame, text="アプリケーションの起動動作を設定します")
+        desc_label.pack(anchor="w", pady=(0, 10))
         
         # チェックボックス
         self.auto_start_var = tk.BooleanVar()
@@ -98,16 +114,21 @@ class BasicSettingsTab:
             variable=self.auto_start_var,
             command=self._toggle_auto_start
         )
-        self.auto_start_check.pack(anchor="w")
+        self.auto_start_check.pack(anchor="w", pady=(0, 5))
         
         # 現在の設定を読み込み
         self.auto_start_var.set(is_auto_start_enabled())
+        
+        # ステータスラベル
+        self.auto_start_status_label = ttk.Label(auto_frame, text="", foreground="gray")
+        self.auto_start_status_label.pack(anchor="w", pady=(10, 0))
+        self._update_auto_start_status()
     
     def _create_prompt_section(self):
         """プロンプト設定セクションを作成"""
         # プロンプトフレーム
         prompt_frame = ttk.LabelFrame(self.scrollable_frame, text="翻訳プロンプト設定", padding="10")
-        prompt_frame.pack(fill="both", expand=True, padx=20, pady=(10, 20))
+        prompt_frame.pack(fill="both", expand=True, padx=10, pady=(10, 20))
         
         # 説明ラベル
         desc_label = ttk.Label(prompt_frame, text="翻訳時に使用するプロンプトをカスタマイズできます:")
@@ -200,6 +221,7 @@ class BasicSettingsTab:
             if success:
                 message = "自動起動を有効にしました" if enabled else "自動起動を無効にしました"
                 logger.info(message)
+                self._update_auto_start_status()
             else:
                 self.auto_start_var.set(not enabled)  # 元に戻す
                 messagebox.showerror("エラー", "自動起動設定の変更に失敗しました")
@@ -238,3 +260,10 @@ class BasicSettingsTab:
             
             # 3秒後にステータスをクリア
             self.frame.after(3000, lambda: self.prompt_status_label.config(text=""))
+    
+    def _update_auto_start_status(self):
+        """自動起動のステータスを更新"""
+        if self.auto_start_var.get():
+            self.auto_start_status_label.config(text="✓ 自動起動が有効です", foreground="green")
+        else:
+            self.auto_start_status_label.config(text="✗ 自動起動が無効です", foreground="gray")
