@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube AI Translation</title>
+    <link rel="stylesheet" href="popup-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+    <!-- 動く背景 -->
+    <div class="animated-background">
+        <div class="neural-network">
+            <div class="node"></div>
+            <div class="node"></div>
+            <div class="node"></div>
+            <div class="node"></div>
+            <div class="node"></div>
+            <div class="node"></div>
+        </div>
+        <div class="floating-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+    
+    <div class="popup-container">
+        <div class="header">
+            <div class="ai-logo">
+                <i class="fa-solid fa-brain"></i>
+                <div class="pulse-ring"></div>
+            </div>
+            <h1>YouTube AI Translation</h1>
+        </div>
+
+        <!-- 字幕設定 -->
+        <div class="path-setting glass-card">
+            <div class="setting-item">
+                <label for="font-size-slider">
+                    <i class="fa-solid fa-text-height"></i>
+                    フォントサイズ: <span id="font-size-value">1.5rem</span>
+                </label>
+                <input type="range" id="font-size-slider" min="10" max="25" value="15" class="slider">
+            </div>
+            
+            <div class="setting-item">
+                <label for="bg-color-picker">
+                    <i class="fa-solid fa-palette"></i>
+                    字幕背景色
+                </label>
+                <div class="color-picker-group">
+                    <input type="color" id="bg-color-picker" value="#000000" class="color-picker">
+                    <div class="color-preview" id="color-preview"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <label for="bg-opacity-slider">
+                    <i class="fa-solid fa-eye"></i>
+                    背景透明度: <span id="bg-opacity-value">75%</span>
+                </label>
+                <input type="range" id="bg-opacity-slider" min="30" max="100" value="75" class="slider">
+            </div>
+            
+            <div class="auto-settings-info">
+                <p><i class="fa-solid fa-info-circle"></i> パディング、角の丸み、横幅は自動調整されます</p>
+            </div>
+        </div>
+
+
+        <div id="status-message"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

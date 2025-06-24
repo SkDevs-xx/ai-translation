@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube AI翻訳 (Gemini版)",
+    "version": "1.1.0",
+    "description": "Gemini APIを使用してYouTubeの英語動画にリアルタイムで日本語字幕を生成します。",
+    "permissions": [
+        "storage"
+    ],
+    "host_permissions": [
+        "*://*.youtube.com/*",
+        "*://generativelanguage.googleapis.com/*",
+        "*://*.googlevideo.com/*",
+        "http://localhost:8888/*"
+    ],
+    "background": {
+        "service_worker": "scripts/background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.youtube.com/watch*"
+            ],
+            "js": [
+                "scripts/content.js"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "popup/popup.html"
+    }
+}

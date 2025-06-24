@@ -1,0 +1,502 @@
+/* YouTube AI Translation - モダンPopup UI with 動く背景 */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    --secondary-gradient: linear-gradient(135deg, #00d4ff 0%, #090979 100%);
+    --ai-gradient: linear-gradient(135deg, #00d4ff 0%, #5a67d8 50%, #667eea 100%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(0, 212, 255, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --success-color: #00d4ff;
+    --error-color: #ff4757;
+    --warning-color: #ffa502;
+    --info-color: #5a67d8;
+}
+
+/* ===== ガラス風カード ===== */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.glass-card:hover::before {
+    left: 100%;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px var(--shadow-color);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 300px;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--primary-gradient);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ===== 動く背景エフェクト ===== */
+.animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(90, 103, 216, 0.1) 0%, transparent 60%),
+        radial-gradient(circle at 40% 40%, rgba(102, 126, 234, 0.08) 0%, transparent 60%),
+        linear-gradient(135deg, #000000 0%, #0f0f23 30%, #1a1a2e 70%, #16213e 100%);
+    animation: backgroundShift 20s ease-in-out infinite;
+}
+
+.neural-network {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+}
+
+.neural-network .node {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--success-color);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+    animation: nodeFloat 15s ease-in-out infinite;
+}
+
+.neural-network .node:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.neural-network .node:nth-child(2) {
+    top: 20%;
+    left: 80%;
+    animation-delay: 2s;
+}
+
+.neural-network .node:nth-child(3) {
+    top: 80%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+.neural-network .node:nth-child(4) {
+    top: 70%;
+    left: 70%;
+    animation-delay: 6s;
+}
+
+.neural-network .node:nth-child(5) {
+    top: 40%;
+    left: 50%;
+    animation-delay: 8s;
+}
+
+.neural-network .node:nth-child(6) {
+    top: 60%;
+    left: 90%;
+    animation-delay: 10s;
+}
+
+.floating-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.05;
+}
+
+.floating-particles .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--success-color);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 212, 255, 0.5);
+    animation: particleFloat 25s linear infinite;
+}
+
+.floating-particles .particle:nth-child(1) {
+    left: 5%;
+    animation-delay: 0s;
+    animation-duration: 20s;
+}
+
+.floating-particles .particle:nth-child(2) {
+    left: 25%;
+    animation-delay: 5s;
+    animation-duration: 25s;
+}
+
+.floating-particles .particle:nth-child(3) {
+    left: 45%;
+    animation-delay: 10s;
+    animation-duration: 22s;
+}
+
+.floating-particles .particle:nth-child(4) {
+    left: 65%;
+    animation-delay: 15s;
+    animation-duration: 27s;
+}
+
+.floating-particles .particle:nth-child(5) {
+    left: 85%;
+    animation-delay: 20s;
+    animation-duration: 24s;
+}
+
+@keyframes backgroundShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes nodeFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.1;
+    }
+
+    25% {
+        transform: translate(10px, -10px) scale(1.2);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: translate(-5px, 5px) scale(0.8);
+        opacity: 0.15;
+    }
+
+    75% {
+        transform: translate(-10px, -5px) scale(1.1);
+        opacity: 0.25;
+    }
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.05;
+    }
+
+    90% {
+        opacity: 0.05;
+    }
+
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.popup-container {
+    padding: 16px;
+}
+
+/* ヘッダー */
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ai-logo {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.ai-logo i {
+    font-size: 2rem;
+    background: var(--ai-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: aiPulse 3s ease-in-out infinite;
+}
+
+.header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 設定カード */
+.settings-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.setting-item {
+    margin-bottom: 16px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.setting-item label i {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+}
+
+/* スライダー */
+.slider {
+    width: 100%;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+/* カラーピッカー */
+.color-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-picker {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.color-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 2px solid var(--border-color);
+    background: #000000;
+}
+
+/* アクションボタン */
+.action-buttons {
+    margin-bottom: 8px;
+}
+
+.btn-settings {
+    width: 100%;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow);
+}
+
+/* ステータスメッセージ */
+#status-message {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    text-align: center;
+    transform: translateY(50px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+#status-message.success {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#status-message.error {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#status-message.info {
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ===== チェックボックス ===== */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--glass-border);
+    border-radius: 4px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.checkbox:checked {
+    background: var(--ai-gradient);
+    border-color: #4facfe;
+}
+
+.checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.checkbox-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* ===== 自動設定情報 ===== */
+.auto-settings-info {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    border-radius: 8px;
+    backdrop-filter: blur(15px);
+}
+
+.auto-settings-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auto-settings-info i {
+    color: var(--success-color);
+    font-size: 14px;
+}
+
+/* ===== Pulse Ring Animation (from options.html) ===== */
+.pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: pulseRing 2s ease-out infinite;
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 0;
+    }
+}
