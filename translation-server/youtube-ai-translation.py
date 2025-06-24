@@ -808,12 +808,48 @@ class YouTubeTranslatorApp:
         except Exception as e:
             self.log_message(f"プロンプト表示初期化エラー: {e}", level='ERROR')
 
+    def set_app_icon(self):
+        """アプリケーションアイコンを設定"""
+        try:
+            # アイコンファイルのパスを取得
+            icon_paths = [
+                # translation-serverフォルダ内のiconsフォルダ
+                "icons/icons-48.png",
+                # PyInstaller実行ファイル用パス（バンドル後）
+                "icons/icons-48.png",
+                # 同一ディレクトリ用パス  
+                "icons-48.png"
+            ]
+            
+            icon_set = False
+            for icon_path in icon_paths:
+                if os.path.exists(icon_path):
+                    try:
+                        # tkinterのphotoimage形式でアイコンを設定
+                        icon_image = tk.PhotoImage(file=icon_path)
+                        self.root.iconphoto(True, icon_image)
+                        self.log_message(f"アイコンを設定しました: {icon_path}")
+                        icon_set = True
+                        break
+                    except Exception as e:
+                        self.log_message(f"アイコン設定失敗 {icon_path}: {e}")
+                        continue
+                        
+            if not icon_set:
+                self.log_message("アイコンファイルが見つかりません", level='WARNING')
+                
+        except Exception as e:
+            self.log_message(f"アイコン設定エラー: {e}", level='ERROR')
+
     def setup_gui(self):
         """GUI初期化（タブ構造）"""
         self.root = tk.Tk()
         self.root.title(f"{APP_NAME} v{APP_VERSION}")
         self.root.geometry("700x550")
         self.root.resizable(True, True)
+        
+        # アイコン設定
+        self.set_app_icon()
         
         # ウィンドウを閉じる時の処理
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
