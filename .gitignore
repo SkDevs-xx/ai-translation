@@ -1,6 +1,40 @@
-/.claude
-/CLAUDE.md
-/ユーザ用
-/作業日誌
-user-debug.md
-.gitignore
+# Python関連ファイルを除外
+translation-server/
+*.py
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# 設定・ログファイル
+*.enc
+*.log
+*.txt
+settings.enc
+python-log.txt
+
+# 一時ファイル
+temp/
+json/
+*.json
+
+# その他
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# 画像ファイル（必要に応じて調整）
+*.png
+*.jpg
+*.jpeg
+
+# Markdown（改善提案などの一時ファイル）
+*改善提案.md
+*_改善提案.md
