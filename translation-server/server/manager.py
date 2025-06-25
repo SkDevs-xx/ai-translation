@@ -23,7 +23,7 @@ class ServerManager:
         self.server_thread = None
         self.is_running_flag = False
         self.handlers = None
-        self.translation_processor = TranslationProcessor()
+        self.translation_processor = TranslationProcessor(security_manager)
         
     def start_server(self):
         """サーバーを起動"""

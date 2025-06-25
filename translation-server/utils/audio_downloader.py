@@ -57,10 +57,6 @@ class AudioDownloader:
                 'preferredcodec': 'mp3',
                 'preferredquality': '128',
             }]
-            logger.info("ffmpegが利用可能です。MP3形式で音声を抽出します。")
-        else:
-            logger.warning("ffmpegが見つかりません。音声ファイルは元の形式のままダウンロードされます。")
-            logger.warning("MP3形式での抽出を行うには、ffmpegをインストールしてください。")
         
         # 進捗コールバックの設定
         if progress_callback:
@@ -123,3 +119,18 @@ class AudioDownloader:
                         logger.info(f"古い音声ファイルを削除: {file_path}")
         except Exception as e:
             logger.error(f"クリーンアップエラー: {e}")
+    
+    def delete_audio_file(self, video_id):
+        """指定された動画IDの音声ファイルを削除"""
+        try:
+            # 複数の拡張子をチェック
+            for ext in ['.mp3', '.m4a', '.webm', '.opus', '.wav']:
+                audio_path = self.temp_dir / f"{video_id}{ext}"
+                if audio_path.exists():
+                    audio_path.unlink()
+                    logger.info(f"音声ファイルを削除: {audio_path}")
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"音声ファイル削除エラー: {e}")
+            return False

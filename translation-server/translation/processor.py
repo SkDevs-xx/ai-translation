@@ -18,12 +18,21 @@ logger = logging.getLogger(__name__)
 class TranslationProcessor:
     """翻訳処理クラス"""
     
-    def __init__(self):
-        self.current_prompt = DEFAULT_PROMPT
+    def __init__(self, security_manager=None):
+        self.security_manager = security_manager
+        # 保存されたプロンプトがあれば読み込む、なければデフォルトを使用
+        if security_manager:
+            saved_prompt = security_manager.load_custom_prompt()
+            self.current_prompt = saved_prompt if saved_prompt else DEFAULT_PROMPT
+        else:
+            self.current_prompt = DEFAULT_PROMPT
     
     def set_prompt(self, prompt):
         """翻訳プロンプトを設定"""
         self.current_prompt = prompt
+        # SecurityManagerがあれば永続化
+        if self.security_manager:
+            self.security_manager.save_custom_prompt(prompt)
         logger.info("翻訳プロンプトを更新しました")
     
     def get_prompt(self):

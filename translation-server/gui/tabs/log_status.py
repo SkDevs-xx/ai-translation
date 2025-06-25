@@ -46,21 +46,14 @@ class LogStatusTab:
         main_container = ttk.Frame(self.frame)
         main_container.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # 上部フレーム（サーバーステータスと翻訳管理）
-        upper_frame = ttk.Frame(main_container)
-        upper_frame.pack(fill="x", pady=(0, 10))
+        # サーバーステータスセクション（小さめ）
+        self._create_server_status_section(main_container)
         
-        # 上部を水平に配置
-        # サーバーステータスセクション
-        self._create_server_status_section(upper_frame)
+        # 翻訳ファイル管理セクション（中サイズ）
+        self._create_translations_section(main_container)
         
-        # 翻訳ファイル管理セクション
-        self._create_translations_section(upper_frame)
-        
-        # 下部フレーム（ログ表示）
-        lower_frame = ttk.Frame(main_container)
-        lower_frame.pack(fill="both", expand=True)
-        self._create_log_section(lower_frame)
+        # ログ表示セクション（大きめ）
+        self._create_log_section(main_container)
         
         # ログハンドラーを設定
         self._setup_log_handler()
@@ -74,12 +67,12 @@ class LogStatusTab:
     
     def _create_server_status_section(self, parent):
         """サーバーステータスセクションを作成"""
-        # ステータスフレーム
-        status_frame = ttk.LabelFrame(parent, text="サーバーステータス", padding="10")
+        # ステータスフレーム（小さめのpadding）
+        status_frame = ttk.LabelFrame(parent, text="サーバーステータス", padding="5")
         
-        # 内容フレーム
+        # 内容フレーム（サイズを固定）
         content_frame = ttk.Frame(status_frame)
-        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        content_frame.pack(fill="x", padx=10, pady=5)
         
         # サーバー状態
         ttk.Label(content_frame, text="状態:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
@@ -124,7 +117,7 @@ class LogStatusTab:
         )
         self.restart_button.pack(side="left", padx=5)
         
-        status_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        status_frame.pack(fill="x", padx=0, pady=(0, 5))
         
         # API キー状態を更新
         self.update_api_key_status()
@@ -145,7 +138,7 @@ class LogStatusTab:
         self.translations_listbox = tk.Listbox(
             list_frame,
             yscrollcommand=scrollbar.set,
-            height=8
+            height=6
         )
         self.translations_listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.translations_listbox.yview)
@@ -190,7 +183,7 @@ class LogStatusTab:
         )
         self.delete_button.pack(side="left", padx=5)
         
-        trans_frame.pack(side="left", fill="both", expand=True, padx=(5, 0))
+        trans_frame.pack(fill="x", padx=0, pady=(5, 5))
         
         # 翻訳データを保持
         self.translations_data = {}
@@ -199,7 +192,7 @@ class LogStatusTab:
         """ログ表示セクションを作成"""
         # ログフレーム
         log_frame = ttk.LabelFrame(parent, text="ログ", padding="10")
-        log_frame.pack(fill="both", expand=True)
+        log_frame.pack(fill="both", expand=True, pady=(5, 0))
         
         # ログ表示エリア
         log_display_frame = ttk.Frame(log_frame)
@@ -328,6 +321,9 @@ class LogStatusTab:
         self.translations_listbox.delete(0, tk.END)
         self.translations_data.clear()
         
+        # インデックスマッピングをクリア
+        self.index_to_video_id = {}
+        
         # JSONディレクトリを確認
         json_dir = Path(JSON_DIR)
         if not json_dir.exists():
@@ -342,12 +338,17 @@ class LogStatusTab:
                 video_id = json_file.stem
                 title = data.get('title', 'Unknown')
                 
-                # リストに追加
-                display_text = f"{video_id} - {title[:50]}..."
+                # リストに追加（タイトルのみ表示）
+                display_text = title[:50] + "..." if len(title) > 50 else title
                 self.translations_listbox.insert(tk.END, display_text)
                 
                 # データを保持
                 self.translations_data[video_id] = data
+                
+                # インデックスとvideo_idのマッピングを保持
+                if not hasattr(self, 'index_to_video_id'):
+                    self.index_to_video_id = {}
+                self.index_to_video_id[self.translations_listbox.size() - 1] = video_id
                 
             except Exception as e:
                 logger.error(f"JSONファイル読み込みエラー ({json_file}): {e}")
@@ -358,17 +359,27 @@ class LogStatusTab:
         if not selection:
             return
         
-        # 選択されたアイテムのテキストから動画IDを抽出
-        selected_text = self.translations_listbox.get(selection[0])
-        video_id = selected_text.split(' - ')[0]
+        # 選択されたアイテムのインデックスから動画IDを取得
+        selected_index = selection[0]
+        video_id = self.index_to_video_id.get(selected_index)
         
-        if video_id in self.translations_data:
+        if video_id and video_id in self.translations_data:
             data = self.translations_data[video_id]
             
             # 情報を表示
             title = data.get('title', 'Unknown')
             subtitle_count = len(data.get('subtitles', []))
             timestamp = data.get('timestamp', '')
+            
+            # タイムスタンプをフォーマット（既に新形式の場合はそのまま、旧形式の場合は変換）
+            if timestamp and 'T' in timestamp:
+                # ISO形式の場合は変換
+                try:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                    timestamp = dt.strftime('%Y-%m-%d %H:%M')
+                except:
+                    pass
             
             info_text = f"タイトル: {title}\n字幕数: {subtitle_count}個\n作成日時: {timestamp}"
             self.translation_info_label.config(text=info_text)
@@ -424,7 +435,8 @@ class LogStatusTab:
         # カスタムハンドラーを作成
         self.log_handler = LogHandler(self.log_queue)
         self.log_handler.setFormatter(
-            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            logging.Formatter('%(asctime)s：%(levelname)s - %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S')
         )
         
         # ルートロガーに追加
@@ -449,7 +461,7 @@ class LogStatusTab:
         # ログレベルを判定
         level = None
         for lvl in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']:
-            if f' - {lvl} - ' in log_entry:
+            if f'：{lvl} - ' in log_entry:
                 level = lvl
                 break
         
@@ -478,5 +490,5 @@ class LogStatusTab:
     def append_log(self, message):
         """外部からログを追加"""
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        log_entry = f"{timestamp} - GUI - INFO - {message}"
+        log_entry = f"{timestamp}：INFO - {message}"
         self.log_queue.put(log_entry)

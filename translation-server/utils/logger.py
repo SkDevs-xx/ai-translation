@@ -14,7 +14,8 @@ def setup_logging(log_level=logging.INFO):
     try:
         logging.basicConfig(
             level=log_level,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            format='%(asctime)s：%(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
         )
         
         # スクリプトのディレクトリを取得
@@ -27,7 +28,7 @@ def setup_logging(log_level=logging.INFO):
         try:
             file_handler = logging.FileHandler(log_file, encoding='utf-8')
             file_handler.setLevel(log_level)
-            file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+            file_handler.setFormatter(logging.Formatter('%(asctime)s：%(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
             logging.getLogger().addHandler(file_handler)
         except Exception as e:
             print(f"ログファイルの設定エラー: {e}")

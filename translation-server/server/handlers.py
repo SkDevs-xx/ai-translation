@@ -113,12 +113,16 @@ class APIHandlers:
             # タイトルとタイムスタンプを追加
             from datetime import datetime
             result_data['title'] = video_title
-            result_data['timestamp'] = datetime.now().isoformat()
+            result_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M')
             
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(result_data, f, ensure_ascii=False, indent=2)
             
             logger.info(f"翻訳完了: {video_id}")
+            
+            # 翻訳完了後に音声ファイルを削除
+            self.audio_downloader.delete_audio_file(video_id)
+            
             # 拡張機能が期待する形式で返却
             response_data = {
                 'success': True,
@@ -157,6 +161,9 @@ class APIHandlers:
             
             json_path.unlink()
             logger.info(f"翻訳データを削除: {video_id}")
+            
+            # 対応する音声ファイルも削除
+            self.audio_downloader.delete_audio_file(video_id)
             
             response_data = {
                 'success': True,

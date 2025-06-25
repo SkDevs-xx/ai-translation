@@ -104,3 +104,14 @@ class SecurityManager:
         """APIキーを読み込み"""
         settings = self.load_settings()
         return settings.get('api_key', None)
+    
+    def save_custom_prompt(self, prompt):
+        """カスタムプロンプトを保存"""
+        settings = self.load_settings()
+        settings['custom_prompt'] = prompt
+        return self.save_settings(settings)
+    
+    def load_custom_prompt(self):
+        """カスタムプロンプトを読み込み"""
+        settings = self.load_settings()
+        return settings.get('custom_prompt', None)

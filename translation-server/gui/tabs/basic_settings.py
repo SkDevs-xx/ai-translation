@@ -197,8 +197,14 @@ class BasicSettingsTab:
         """現在のプロンプトを読み込む"""
         if hasattr(self.server_manager, 'get_current_prompt'):
             prompt = self.server_manager.get_current_prompt()
+            # 一時的に変更イベントを無効化
+            self.prompt_text.bind('<<Modified>>', '')
             self.prompt_text.delete(1.0, tk.END)
             self.prompt_text.insert(1.0, prompt)
+            # 変更フラグを明示的にリセット
+            self.prompt_text.edit_modified(False)
+            # 変更イベントを再有効化
+            self.prompt_text.bind('<<Modified>>', self._on_prompt_modified)
     
     def _save_prompt(self):
         """プロンプトを保存"""
@@ -213,8 +219,15 @@ class BasicSettingsTab:
     
     def _reset_prompt(self):
         """プロンプトをデフォルトに戻す"""
+        # 一時的に変更イベントを無効化
+        self.prompt_text.bind('<<Modified>>', '')
         self.prompt_text.delete(1.0, tk.END)
         self.prompt_text.insert(1.0, DEFAULT_PROMPT)
+        # 変更フラグを明示的にリセット
+        self.prompt_text.edit_modified(False)
+        # 変更イベントを再有効化
+        self.prompt_text.bind('<<Modified>>', self._on_prompt_modified)
+        
         if hasattr(self.server_manager, 'set_prompt'):
             self.server_manager.set_prompt(DEFAULT_PROMPT)
             self.prompt_status_label.config(text="✓ デフォルトに戻しました", foreground="green")
